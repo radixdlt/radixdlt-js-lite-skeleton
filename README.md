@@ -11,3 +11,7 @@ npm install
 # serve with hot reload at localhost:8080
 npm run dev
 ```
+
+# Check the live version [here](https://radixdlt.github.io/radixdlt-js-lite-skeleton)!
+
+> Only Chrome.
