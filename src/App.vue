@@ -54,13 +54,14 @@
 import Address from '@/components/Address'
 import Balance from '@/components/Balance'
 
-import SendTransaction from '@/components/SendTransaction'
-import SendMessage from '@/components/SendMessage'
-import SendApplicationMessage from '@/components/SendApplicationMessage'
+import SendTransaction from '@/components/transactions/SendTransaction'
+import ListTransactions from '@/components/transactions/ListTransactions'
 
-import ListTransactions from '@/components/ListTransactions'
-import ListMessages from '@/components/ListMessages'
-import ListApplicationMessages from '@/components/ListApplicationMessages'
+import SendMessage from '@/components/messages/SendMessage'
+import ListMessages from '@/components/messages/ListMessages'
+
+import SendApplicationMessage from '@/components/application-messages/SendApplicationMessage'
+import ListApplicationMessages from '@/components/application-messages/ListApplicationMessages'
 
 import { registerApp } from 'radixdlt-js-lite'
 
