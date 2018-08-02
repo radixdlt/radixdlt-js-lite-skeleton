@@ -1,53 +1,40 @@
-<template>
-  <div id="app">
+<template lang="pug">
+  div#app
+    img.logo(style="height: 80px; float: right", src="./assets/logo.png")
+    div.site-wrapper-inner
+      h1 radixdlt-js-lite
+      h4 skeleton example
 
-    <img style="height: 80px; float: right" class="logo" src="./assets/logo.png">
+      //- User's Address & Balance
+      div.row
+        div.col-md-12.col-lg-9.column
+          Address(:address="address")
+        div.col-md-12.col-lg-3.column
+          Balance(:balance="balance")
 
-    <div class="site-wrapper-inner">
-      <h1>radixdlt-js-lite</h1>
-      <h4>skeleton example</h4>
+      //- Tabs
+      vue-tabs
 
-      <div class="row">
-        <div class="col-md-12 col-lg-9 column">
-          <Address :address="address"/>
-        </div>
-        <div class="col-md-12 col-lg-3 column">
-          <Balance :balance="balance"/>
-        </div>
-      </div>
+        //- 1st Tab: Transactions
+        v-tab(title="Transactions")
+          div.row
+            div.col-md-12.column
+              SendTransaction(:token="token")
+              ListTransactions(:transactions="transactions")
 
-      <vue-tabs>
-        <v-tab title="Transactions">
-          <div class="row">
-            <div class="col-md-12 column">
-              <SendTransaction :token="token"/>
-              <ListTransactions :transactions="transactions"/>
-            </div>
-          </div>
-        </v-tab>
-
-        <v-tab title="Messages">
-          <div class="row">
-            <div class="col-md-12 column">
-              <SendMessage :token="token"/>
-              <ListMessages :messages="messages"/>
-            </div>
-          </div>
-        </v-tab>
-
-        <v-tab title="Application Messages">
-          <div class="row">
-            <div class="col-md-12 column">
-              <SendApplicationMessage :token="token"/>
-              <ListApplicationMessages :token="token"/>
-            </div>
-          </div>
-        </v-tab>
-      </vue-tabs>
-
-    </div>
-  </div>
-
+        //- 2nd Tab: Messages
+        v-tab(title="Messages")
+          div.row
+            div.col-md-12.column
+              SendMessage(:token="token")
+              ListMessages(:messages="messages")
+              
+        //- 3rd Tab: Application Messages
+        v-tab(title="Application Messages")
+          div.row
+            div.col-md-12.column
+              SendApplicationMessage(:token="token")
+              ListApplicationMessages(:token="token")
 </template>
 
 <script>
@@ -67,6 +54,7 @@ import { registerApp } from 'radixdlt-js-lite'
 
 export default {
   name: 'App',
+  // List of imported components, to be used on this component
   components: {
     Address,
     Balance,
@@ -90,6 +78,7 @@ export default {
   created () {
     const name = 'radixdlt-js-lite-skeleton'
     const description = 'Minimal sample App to wrap the radixdlt-js-lite library functionality.'
+    // The list of permissions requested by this app
     const permissions = [
       'address',
       'balance',
@@ -103,9 +92,12 @@ export default {
 
     registerApp(name, description, permissions)
       .then(radixConnection => {
+        // Save the token to be pass as a parameter to each sub-component
         this.token = radixConnection.token
 
+        // Get an instance of the Wallet module
         const wallet = radixConnection.getWallet()
+        // Get an instance of the Messaging module
         const messaging = radixConnection.getMessaging()
 
         // Get address

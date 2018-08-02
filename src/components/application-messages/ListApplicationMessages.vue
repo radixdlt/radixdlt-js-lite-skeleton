@@ -29,12 +29,12 @@ export default {
   },
   methods: {
     getApplicationMessages () {
+      // Re-connects to the wallet using the previous valid token
       connectApp(this.token)
         .then(radixConnection => {
           const messaging = radixConnection.getMessaging()
 
           this.messages = []
-
           // Get old and new application messages
           messaging.getApplicationMessages(this.applicationId).subscribe(message => {
             this.messages.push(message)
