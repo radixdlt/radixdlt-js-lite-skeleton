@@ -14,7 +14,6 @@
 
       //- Tabs
       vue-tabs
-
         //- 1st Tab: Transactions
         v-tab(title="Transactions")
           div.row
@@ -28,7 +27,7 @@
             div.col-md-12.column
               SendMessage(:token="token")
               ListMessages(:messages="messages")
-              
+
         //- 3rd Tab: Application Messages
         v-tab(title="Application Messages")
           div.row
@@ -38,6 +37,7 @@
 </template>
 
 <script>
+/* eslint-disable */
 import Address from '@/components/Address'
 import Balance from '@/components/Balance'
 
@@ -50,7 +50,16 @@ import ListMessages from '@/components/messages/ListMessages'
 import SendApplicationMessage from '@/components/application-messages/SendApplicationMessage'
 import ListApplicationMessages from '@/components/application-messages/ListApplicationMessages'
 
-import { registerApp } from 'radixdlt-js-lite'
+// import { registerApp } from 'radixdlt-js-lite'
+
+import {
+  radixToken,
+  radixUniverse,
+  RadixUniverse,
+  RadixIdentityManager,
+  RadixSimpleIdentity,
+  RadixKeyPair
+} from '../../radixdlt-js'
 
 export default {
   name: 'App',
@@ -65,55 +74,108 @@ export default {
     ListMessages,
     ListApplicationMessages
   },
-  data () {
+  data() {
     return {
       address: 'address',
       balance: 'balance',
       transactions: [],
       messages: [],
       applicationMessages: [],
-      token: null
+      token: null,
+      identity: null
     }
   },
-  created () {
-    const name = 'radixdlt-js-lite-skeleton'
-    const description = 'Minimal sample App to wrap the radixdlt-js-lite library functionality.'
-    // The list of permissions requested by this app
-    const permissions = [
-      'address',
-      'balance',
-      'send_transactions',
-      'send_messages',
-      'send_application_messages',
-      'transactions',
-      'messages',
-      'application_messages'
-    ]
+  created() {
+    // TODO: move the order of this
+    radixUniverse.bootstrap(RadixUniverse.HIGHGARDEN)
+    radixToken.initialize()
 
-    registerApp(name, description, permissions)
-      .then(radixConnection => {
-        // Save the token to be pass as a parameter to each sub-component
-        this.token = radixConnection.token
+    // const identityManager = new RadixIdentityManager()
+    // console.log(identityManager)
+    if (!this.$localStorage.get('private')) {
+      this.$localStorage.set('private', RadixKeyPair.generateNew().getPrivate())
+    }
+    
+    const keyPair = RadixKeyPair.fromPrivate(this.$localStorage.get('private'))
+    const identity = new RadixSimpleIdentity(keyPair)
+    
+    this.identity = identity
 
-        // Get an instance of the Wallet module
-        const wallet = radixConnection.getWallet()
-        // Get an instance of the Messaging module
-        const messaging = radixConnection.getMessaging()
+    const testToken = radixToken.getTokenByISO('TEST')
 
-        // Get address
-        radixConnection.getAddress().subscribe(address => { this.address = address })
-        // Get balance
-        wallet.getBalance().subscribe(balance => { this.balance = balance })
-        // Get transactions
-        wallet.getTransactions().subscribe(transaction => { this.transactions.push(transaction) })
-        // Get messages
-        messaging.getMessages().subscribe(message => { this.messages.push(message) })
-        // Get application messages
-        messaging.getApplicationMessages('test-app-id').subscribe(message => { this.applicationMessages.push(message) })
-      })
-      .catch(error => {
-        console.log(`Error while registering your app: ${JSON.stringify(error)}`)
-      })
+    this.address = keyPair.getAddress()
+    this.balance = testToken.toDecimal(identity.account.transferSystem.balance[testToken.id.toString()])
+    
+    console.log(identity.account.transferSystem.balance)
+    
+    // this.transactions = identity.account.transferSystem.transactions.values()
+
+    identity.account.transferSystem.transactionSubject.subscribe((transactionUpdate) => {
+      console.log(transactionUpdate)
+      this.transaction.push(transactionUpdate)
+    })
+    
+    identity.account.openNodeConnection()
+
+    // this.transactions = _.orderBy(rawTransactions, ['timestamp'], ['desc'])
+    //   .map((transaction) => {
+    //       const token_id = Object.keys(transaction.balance)[0] // Assume single token transactions
+    //       const token = this.tokens[token_id]
+    //       const timeString = new Date(transaction.timestamp).toLocaleTimeString()
+    //       const address = Object.keys(transaction.participants)[0] // Assume single participant transactions
+          
+    //       let displayName = address
+    //       if (address in this.contacts) {
+    //           displayName = this.contacts[address].alias       
+    //       }
+
+    //       return {
+    //           token: token,
+    //           balance: token.toDecimal(transaction.balance[token_id]),
+    //           address: address, 
+    //           displayName: displayName,
+    //           time: timeString,
+    //       }
+    //   })
+
+    // const name = 'radixdlt-js-lite-skeleton'
+    // const description = 'Minimal sample App to wrap the radixdlt-js-lite library functionality.'
+    // // The list of permissions requested by this app
+    // const permissions = [
+    //   'address',
+    //   'balance',
+    //   'send_transactions',
+    //   'send_messages',
+    //   'send_application_messages',
+    //   'transactions',
+    //   'messages',
+    //   'application_messages'
+    // ]
+
+    // registerApp(name, description, permissions)
+    //   .then(radixConnection => {
+    //     // Save the token to be pass as a parameter to each sub-component
+    //     this.token = radixConnection.token
+
+    //     // Get an instance of the Wallet module
+    //     const wallet = radixConnection.getWallet()
+    //     // Get an instance of the Messaging module
+    //     const messaging = radixConnection.getMessaging()
+
+    //     // Get address
+    //     radixConnection.getAddress().subscribe(address => { this.address = address })
+    //     // Get balance
+    //     wallet.getBalance().subscribe(balance => { this.balance = balance })
+    //     // Get transactions
+    //     wallet.getTransactions().subscribe(transaction => { this.transactions.push(transaction) })
+    //     // Get messages
+    //     messaging.getMessages().subscribe(message => { this.messages.push(message) })
+    //     // Get application messages
+    //     messaging.getApplicationMessages('test-app-id').subscribe(message => { this.applicationMessages.push(message) })
+    //   })
+    //   .catch(error => {
+    //     console.log(`Error while registering your app: ${JSON.stringify(error)}`)
+    //   })
   }
 }
 </script>
@@ -139,7 +201,8 @@ body {
   color: #fff;
 }
 
-.btn:focus, .btn-custom:focus{
+.btn:focus,
+.btn-custom:focus {
   outline: 0 !important;
 }
 .btn-custom {
@@ -155,17 +218,21 @@ body {
   border: none;
 }
 
-.form-control::-webkit-input-placeholder { /* Chrome */
+.form-control::-webkit-input-placeholder {
+  /* Chrome */
   color: #e6d9d9;
 }
-.form-control:-ms-input-placeholder { /* IE 10+ */
+.form-control:-ms-input-placeholder {
+  /* IE 10+ */
   color: #e6d9d9;
 }
-.form-control::-moz-placeholder { /* Firefox 19+ */
+.form-control::-moz-placeholder {
+  /* Firefox 19+ */
   color: #e6d9d9;
   opacity: 1;
 }
-.form-control:-moz-placeholder { /* Firefox 4 - 18 */
+.form-control:-moz-placeholder {
+  /* Firefox 4 - 18 */
   color: #e6d9d9;
   opacity: 1;
 }
@@ -173,7 +240,9 @@ body {
 .column {
   padding: 10px 15px;
 }
-.column input, .column textarea, .column .form-check {
+.column input,
+.column textarea,
+.column .form-check {
   margin-bottom: 5px;
 }
 
