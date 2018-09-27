@@ -1,6 +1,6 @@
 # radixdlt-js-lite-skeleton
 
-Minimal sample App to showcase some of the things that can be done with the RADIX Javascript lite Client library.
+Minimal sample App to showcase some of the things that can be done with the [Radix](https://www.radixdlt.com) Javascript lite Client library.
 
 ## Build Setup
 
