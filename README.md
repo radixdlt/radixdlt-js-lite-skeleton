@@ -1,3 +1,5 @@
+# DEPRECATED
+
 # radixdlt-js-lite-skeleton
 
 Minimal sample App to showcase some of the things that can be done with the [Radix](https://www.radixdlt.com) JavaScript lite Client library.
